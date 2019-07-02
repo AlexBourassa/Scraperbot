@@ -1,0 +1,81 @@
+/* Header/Blog Title */
+h1 {
+    padding: 10px;
+    margin: 0px;
+    font-size: 40px;
+    text-align: center;
+}
+
+body {
+    font-family: Arial;
+    padding: 20px;
+    background: #f1f1f1;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+
+
+.Container{
+    overflow: auto;
+    border: 3px solid;
+    padding:5px;
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.stats{
+    font-style:italic;
+}
+
+.Article{
+    overflow: auto;
+    border: 3px solid;
+    padding: 5px;
+    border-radius: 15px;
+    margin: 20px;
+}
+
+/* Article titles */
+.Article h3 {
+    margin: 8px;
+}
+.Article h3:hover{
+    color: red;
+}
+
+.Article img{
+    overflow:auto;
+    width:250;
+    /* height:250; */
+}
+
+/*Journal title*/
+.Article .journal {
+    display: block;
+    font-size: 1em;
+    font-weight: bold;
+    /* position: relative;
+    vertical-align: middle;  */
+}
+.Article .journal img {
+    /* float: left; */
+    width: 50px;
+    height: 50px;
+    vertical-align: middle; 
+    /* background: #555; */
+}
+
+
+.ArXiV{
+    
+}
+
+.RSS {
+
+}
+
