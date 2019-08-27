@@ -138,7 +138,7 @@ def scrape_ArXiV(days):
     string += ('all:{}+OR+'*(len(buzzwords)-1)+'all:{})').format(*buzzwords)
     string += ('+AND+({}'+'+OR+{}'*(len(cats)-1)+')').format(*cats)
     string += '+AND+submittedDate:[{}+TO+{}]'.format(*dates_str)
-    string += '&sortBy=submittedDate&max_results=2000'
+    string += '&sortBy=submittedDate&max_results=10000'
 
     try:
         # Issue query
