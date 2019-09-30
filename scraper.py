@@ -2,8 +2,8 @@ import datetime
 import feedparser
 from time import mktime, time, sleep
 import requests
-from link_preview import link_preview
 import traceback
+from urllib.request import build_opener, HTTPCookieProcessor, Request
 import re
 
 from scraper_const import feeds, cats, buzzwords
@@ -38,15 +38,16 @@ class Article:
         html_img = ''
         if preview:
             try:
-                preview = link_preview.generate_dict(self.url)
+                preview = generate_dict(self.url)
                 if any(ext in preview['image'] for ext in ['png', 'jpeg']):
                     html_img = '<img src="{}" ALIGN="left">'.format(preview['image'])
                 title, abstract = preview['title'], preview['description']
             except:
-                print("Failed to load preview for: {}<br>".format(self.url))
+                print("Failed to load preview for: {}".format(self.url))
+                traceback.print_exc()
         
         # Remove some html tags from the abstract
-        img_in_abstract = re.search("<img .*?>", abstract)
+        img_in_abstract = re.search("<img [\s\S]*?>", abstract)
         if not img_in_abstract is None:
             img_in_abstract = img_in_abstract.group()
             abstract = abstract.replace(img_in_abstract, '')
@@ -187,6 +188,131 @@ def scrape(days):
 
 
 
+
+"""
+The following is a slightly modified version of the link_preview package which can be found here:
+https://github.com/aakash4525/py_link_preview/blob/master/link_preview/link_preview.py
+
+I've copied it here to:
+    1. Limit the use of external pakages
+    2. Make the url request compatible with some of the journals (ie: set user agent and enable cookie)
+"""
+
+def generate_dict(url):
+    '''
+        returns dictionary containing elements of link_preview:
+            dict_keys :
+                'title' : '',
+                'description': '',
+                'image': '',
+                'website': ''
+        if Exception occurs, it raises Exception of urllib.request module.
+    '''
+    return_dict = {}
+    try:
+        #----------------------------------  MODIFIED CODE  --------------------------------------
+        opener = build_opener(HTTPCookieProcessor())
+        html = opener.open(Request(
+                            url, 
+                            data=None, 
+                            headers={
+                                'User-Agent': 'Mozilla'
+                            }
+        ), timeout=30).read().decode('utf-8')
+        #----------------------------------------------------------------------------------------
+        meta_elems = re.findall('<[\s]*meta[^<>]+og:(?:title|image|description)(?!:)[^<>]+>', html)
+        og_map = map(return_og, meta_elems)
+        og_dict = dict(list(og_map))
+    
+    #     title
+        try:
+            return_dict['title'] = og_dict['og.title']
+        except KeyError:
+            return_dict['title'] = find_title(html)
+    
+    #     description
+        try:
+            return_dict['description'] = og_dict['og.description']
+        except KeyError:
+            return_dict['description'] = find_meta_desc(html)
+    
+    #     website
+        return_dict['website'] = find_host_website(url)
+    
+    #     Image
+        try:
+            return_dict['image'] = og_dict['og.image']
+        except KeyError:
+            image_path = find_image(html)
+            if 'http' not in image_path:
+                image_path = 'http://' + return_dict['website'] + image_path
+            return_dict['image'] = image_path
+        
+        return return_dict
+    
+    except Exception as e:
+        'Raises Occurred Exception'
+        raise e
+
+def return_og(elem):
+    '''
+        returns content of og_elements
+    '''
+    content = re.findall('content[\s]*=[\s]*"[^<>"]+"', elem)[0]
+    p = re.findall('"[^<>]+"', content)[0][1:-1]
+    if 'og:title' in elem:
+        return ("og.title", p)
+    elif 'og:image' in elem and 'og:image:' not in elem:
+        return ("og.image", p)
+    elif 'og:description' in elem:
+        return ("og.description", p)
+    
+def find_title(html):
+    '''
+        returns the <title> of html
+    '''
+    try:
+        title_elem = re.findall('<[\s]*title[\s]*>[^<>]+<[\s]*/[\s]*title[\s]*>', html)[0]
+        title = re.findall('>[^<>]+<', title_elem)[0][1:-1]
+    except:
+        title = ''
+    return title
+
+def find_meta_desc(html):
+    '''
+        returns the description (<meta name="description") of html
+    '''
+    try:
+        meta_elem = re.findall('<[\s]*meta[^<>]+name[\s]*=[\s]*"[\s]*description[\s]*"[^<>]*>', html)[0]
+        content = re.findall('content[\s]*=[\s]*"[^<>"]+"', meta_elem)[0]
+        description = re.findall('"[^<>]+"', content)[0][1:-1]
+    except:
+        description = ''
+    return description
+
+def find_image(html):
+    '''
+        returns the favicon of html
+    '''
+    try:
+        favicon_elem = re.findall('<[\s]*link[^<>]+rel[\s]*=[\s]*"[\s]*shortcut icon[\s]*"[^<>]*>', html)[0]
+        href = re.findall('href[\s]*=[\s]*"[^<>"]+"', favicon_elem)[0]
+        image = re.findall('"[^<>]+"', href)[0][1:-1]
+    except:
+        image = ''
+    return image
+
+def find_host_website(url):
+    '''
+        returns host website from the url
+    '''
+    return list(filter(lambda x: '.' in x, url.split('/')))[0]
+
+
+
+"""
+This handles the execution from a coomand line
+"""
 
 import webbrowser, os, sys
 
