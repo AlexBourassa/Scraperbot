@@ -22,6 +22,7 @@ feeds = [
     Feed('http://aip.scitation.org/action/showFeed?type=etoc&feed=rss&jc=jap', 'Journal of Applied Physics', 'Journal of Applied Physics', 'img/aip.png'),
     Feed('http://feeds.feedburner.com/acs/apchd5','ACS Photonics','ACS Phot.', 'img/acs.png'),
     Feed('http://feeds.feedburner.com/acs/nalefd','ACS Nano Letter','NanoLetter', 'img/acs.png'),
+    Feed('http://feeds.nature.com/npjqi/rss/current','NPJ Quantum Information','NPJQI', 'img/npj.jpg'),
 ]
 
 """
@@ -54,10 +55,10 @@ buzzwords = [
         'spin qubit',
         'single defect',
         'color center',
-        
+
         'silicon carbide',
         ' SiC ',
-        
+
         'divacancies',
         'divacancy',
         'VV0',
@@ -66,7 +67,7 @@ buzzwords = [
         'silicon vacancy',
         ' NV ',
         'N-V',
-        
+
         # 'optomechanics',
         # 'nanomechanics',
         # 'optomechanical',
